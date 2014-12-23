@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#
+# A script to generate pseudorandom passwords
 
 from random import choice
 from string import ascii_letters, digits, punctuation
