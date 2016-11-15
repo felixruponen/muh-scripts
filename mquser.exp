@@ -1,0 +1,24 @@
+#!/usr/bin/expect
+
+log_user 0
+set timeout 20
+
+set addr [lindex $argv 0]
+
+spawn ssh-keygen -R $addr
+spawn ssh -l mquser $addr
+
+expect "(yes/no)?"
+send "yes\n"
+
+expect ".*password:"
+send "\n"
+
+log_user 1
+expect -re ".*$"
+send "su\n"
+expect "Password:"
+send "\n"
+
+interact
+log_user 0

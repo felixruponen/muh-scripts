@@ -1,0 +1,24 @@
+#!/usr/bin/expect -f
+# cd into the 64 bit folder of the client
+# usage: forticlient.exp
+
+spawn ./forticlientsslvpn_cli --server <VPNIP>:<VPNPORT> --vpnuser <VPNUSER> 2>&1
+log_user 0
+send_user "Logging in\n"
+expect "Password for VPN:"
+send "<VPNPASSWORD>\n"
+
+# i needed ths for 'certificate error'
+expect "Would you like to connect to this server"
+send "Y\n"
+send_user "Beginning to connect\n"
+expect "STATUS::Tunnel running"
+send_user "Tunnel running!\n"
+
+# this is how long the next expect waits for pattern match, in seconds
+set timeout 90001
+expect "STATUS::Tunnel closed"
+send_user "Tunnel closed!\n"
+send_user "Dying\n"
+close
+exit
