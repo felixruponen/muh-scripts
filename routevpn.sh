@@ -13,14 +13,30 @@ ip addr show $ETH_IFACE &> /dev/null
 
 [ $UID -eq 0 ] || { echo "you're not a root"; exit 1; }
 
-echo "Fixing the interface"
-ip addr add 192.168.117.1/24 dev $ETH_IFACE
+function cleanup {
+  echo ""
+  echo "Flush interface: $ETH_IFACE..."
+  ip addr flush dev $ETH_IFACE
+
+  echo "Remove iptables..."
+  iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+	
+  echo ""
+  echo "Finish cleanup"
+}
+
+trap cleanup EXIT
+
+echo ""
+echo "Setup interface $ETH_IFACE..."
+ip addr add 192.168.118.1/24 dev $ETH_IFACE
 ip link set $ETH_IFACE up
 
-echo "Setting up dnsmasq"
-dnsmasq -u dnsmasq -r /etc/resolv.conf --bogus-priv --domain-needed --interface=$ETH_IFACE --dhcp-range=192.168.117.10,192.168.117.100,12h
-
-echo "Fixing iptables"
+echo "Setup iptables..."
 iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
 
-echo "Done!"
+echo "Run dnsmasq..."
+echo ""
+dnsmasq -u dnsmasq -r /etc/resolv.conf --no-daemon --bogus-priv --domain-needed --interface=$ETH_IFACE --dhcp-range=192.168.118.10,192.168.118.100,12h
+
+
